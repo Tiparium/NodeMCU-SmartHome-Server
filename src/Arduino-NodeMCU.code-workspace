@@ -1,0 +1,12 @@
+{
+	"folders": [
+		{
+			"path": "../../../Git_W/Arduino-NodeMCU"
+		},
+		{
+			"name": "WebServer",
+			"path": ".."
+		}
+	],
+	"settings": {}
+}
