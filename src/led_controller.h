@@ -1,5 +1,5 @@
-#ifndef LED_CONTROLLER_H
-#define LED_CONTROLLER_H
+#pragma once
+
 #include "Arduino.h"
 #include <FastLED.h>
 
@@ -22,5 +22,3 @@ class led_controller {
     int       _NUM_LEDS;
     uint32_t  _roygbiv[7] = {CRGB::Red, CRGB::DarkOrange, CRGB::Yellow, CRGB::DarkGreen, CRGB::Blue, CRGB::Indigo, CRGB::Violet};
 };
-
-#endif
