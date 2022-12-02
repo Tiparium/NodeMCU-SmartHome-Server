@@ -74,17 +74,6 @@ void WebServer::setLocalColors()
     Serial.println("Error Deserializing Input JSON");
 }
 
-void WebServer::debugPrintRGB()
-{
-    Serial.print("R: ");
-    Serial.println(_rgb.r);
-    Serial.print("G: ");
-    Serial.println(_rgb.g);
-    Serial.print("B: ");
-    Serial.println(_rgb.b);
-    Serial.println("---------------------------------");
-}
-
 void WebServer::handleClient()
 {
     _server.handleClient();
@@ -102,4 +91,16 @@ void WebServer::initLEDS()
 void WebServer::syncLEDS(){
     CRGB color = {_rgb.r, _rgb.g, _rgb.b};
     _ledController.color(_leds, color);
+}
+
+// DEBUG
+void WebServer::debugPrintRGB()
+{
+    Serial.print("R: ");
+    Serial.println(_rgb.r);
+    Serial.print("G: ");
+    Serial.println(_rgb.g);
+    Serial.print("B: ");
+    Serial.println(_rgb.b);
+    Serial.println("---------------------------------");
 }
