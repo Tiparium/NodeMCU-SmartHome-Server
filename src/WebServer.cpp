@@ -46,7 +46,7 @@ void WebServer::setLocalColors() // Called by desktop application
         // Serial.println(debugStr);
         std::vector<TIP_RGB> patternBuilder;
 
-        for(size_t i = 0; i < object["rgbDataPoints"][i].size(); i++)
+        for(size_t i = 0; i < object["rgbDataPoints"].size(); i++)
         {
             TIP_RGB tempRGB;
             String r = object["rgbDataPoints"][i]["r"];
@@ -78,7 +78,7 @@ void WebServer::getLocalColors() // Called by other NodeMCU Clients
         rgbItem["r"] = _rgbPattern[i].r;
         rgbItem["g"] = _rgbPattern[i].g;
         rgbItem["b"] = _rgbPattern[i].b;
-        jDoc.add(rgbItem);
+        jDoc["rgbDataPoints"].add(rgbItem);
     }
 
     String out;
