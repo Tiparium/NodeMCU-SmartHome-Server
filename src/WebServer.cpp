@@ -33,21 +33,7 @@ int WebServer::initWebServer()
     return 0;
 }
 
-void WebServer::getLocalColors()
-{
-    DynamicJsonDocument doc(500);
-    doc["r"] = _rgb.r;
-    doc["g"] = _rgb.g;
-    doc["b"] = _rgb.b;
-
-    String out;
-    serializeJson(doc, out);
-    Serial.println("GET: ");
-    debugPrintRGB();
-    _server.send(200, "text/plain", out);
-}
-
-void WebServer::setLocalColors()
+void WebServer::setLocalColors() // Called by desktop application
 {
     String data_string = _server.arg("plain");
     StaticJsonDocument<400> jDoc;
@@ -57,21 +43,49 @@ void WebServer::setLocalColors()
         JsonObject object = jDoc.as<JsonObject>();
         String debugStr;
         serializeJsonPretty(jDoc, debugStr);
+        // Serial.println(debugStr);
+        std::vector<TIP_RGB> patternBuilder;
 
-        String r = object["r"];
-        String g = object["g"];
-        String b = object["b"];
+        for(size_t i = 0; i < object["rgbDataPoints"][i].size(); i++)
+        {
+            TIP_RGB tempRGB;
+            String r = object["rgbDataPoints"][i]["r"];
+            String g = object["rgbDataPoints"][i]["g"];
+            String b = object["rgbDataPoints"][i]["b"];
 
-        _rgb.r = r.toInt();
-        _rgb.g = g.toInt();
-        _rgb.b = b.toInt();
+            tempRGB.r = r.toInt();
+            tempRGB.g = g.toInt();
+            tempRGB.b = b.toInt();
 
-        Serial.println("SET: ");
-        debugPrintRGB();
+            patternBuilder.push_back(tempRGB);
+        }
+
+        _rgbPattern = patternBuilder;
+
+        debugPrintRGBPattern();
         _server.send(204);
         return;
     }
     Serial.println("Error Deserializing Input JSON");
+}
+
+void WebServer::getLocalColors() // Called by other NodeMCU Clients
+{
+    DynamicJsonDocument jDoc(5000);
+    for(size_t i = 0; i < _rgbPattern.size(); i++)
+    {
+        StaticJsonDocument<150> rgbItem;
+        rgbItem["r"] = _rgbPattern[i].r;
+        rgbItem["g"] = _rgbPattern[i].g;
+        rgbItem["b"] = _rgbPattern[i].b;
+        jDoc.add(rgbItem);
+    }
+
+    String out;
+    serializeJson(jDoc, out);
+    String debugStr;
+    serializeJsonPretty(jDoc, debugStr);
+    _server.send(200, "text/plain", out);
 }
 
 void WebServer::handleClient()
@@ -89,18 +103,30 @@ void WebServer::initLEDS()
 }
 
 void WebServer::syncLEDS(){
-    CRGB color = {_rgb.r, _rgb.g, _rgb.b};
-    _ledController.color(_leds, color);
+    std::vector<CRGB> pattern;
+    for(int i = 0; i < _rgbPattern.size(); i++)
+    {
+        CRGB color = {_rgbPattern[i].r, _rgbPattern[i].g, _rgbPattern[i].b};
+        pattern.push_back(color);
+        _ledController.staticPattern(_leds, pattern);
+    }
 }
 
 // DEBUG
-void WebServer::debugPrintRGB()
+void WebServer::debugPrintRGBPattern()
 {
-    Serial.print("R: ");
-    Serial.println(_rgb.r);
-    Serial.print("G: ");
-    Serial.println(_rgb.g);
-    Serial.print("B: ");
-    Serial.println(_rgb.b);
-    Serial.println("---------------------------------");
+    for(size_t i = 0; i < _rgbPattern.size(); i++)
+    {
+        Serial.print("Item: ");
+        Serial.println(i);
+        Serial.print("R: ");
+        Serial.println(_rgbPattern[i].r);
+        Serial.print("G: ");
+        Serial.println(_rgbPattern[i].g);
+        Serial.print("B: ");
+        Serial.println(_rgbPattern[i].b);
+        Serial.println("---------------------------------");
+    }
+    Serial.println("****_________________________________****");
+
 }

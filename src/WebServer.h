@@ -37,20 +37,21 @@ public:
     int     initWebServer();
     void    handleClient();
 
-    void    getLocalColors();
     void    setLocalColors();
+    void    getLocalColors();
 
     // LED Controller
     void    initLEDS();
     void    syncLEDS();
 
     // Debug
-    void debugPrintRGB();
+    void debugPrintRGBPattern();
 private:
     // Webserver
-    data             _data;
-    ESP8266WebServer _server;
-    TIP_RGB          _rgb = TIP_RGB(0, 0, 0);
+    data                    _data;
+    ESP8266WebServer        _server;
+    std::vector<TIP_RGB>    _rgbPattern;
+    TIP_RGB                 _rgb = TIP_RGB(0, 0, 0);
     // LED Controller
     static const int _numLEDS = 9; // 9 for microtesting, 300 for whole strip, 175 far large scale testing
     CRGB             _leds[_numLEDS];
