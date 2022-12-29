@@ -37,8 +37,8 @@ public:
     int     initWebServer();
     void    handleClient();
 
-    void    setLocalColors();
-    void    getLocalColors();
+    void    receiveLEDPattern();
+    void    broadcastLEDPattern();
 
     // LED Controller
     void    initLEDS();
@@ -53,7 +53,7 @@ private:
     std::vector<TIP_RGB>    _rgbPattern;
     TIP_RGB                 _rgb = TIP_RGB(0, 0, 0);
     // LED Controller
-    static const int _numLEDS = 9; // 9 for microtesting, 300 for whole strip, 175 far large scale testing
+    static const int _numLEDS = 27; // 9 for microtesting, 300 for whole strip, 175 far large scale testing
     CRGB             _leds[_numLEDS];
     led_controller   _ledController = led_controller(_numLEDS, _led_pin, _leds);
 };

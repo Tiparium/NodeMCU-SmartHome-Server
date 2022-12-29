@@ -27,16 +27,22 @@ int WebServer::initWebServer()
     Serial.println(WiFi.localIP());
 
     _server.on("/", [](){});
-    _server.on("/setcolor", std::bind(&WebServer::setLocalColors, this));
-    _server.on("/getcolor", std::bind(&WebServer::getLocalColors, this));
+    _server.on("/setcolor", std::bind(&WebServer::receiveLEDPattern, this));
+    _server.on("/getcolor", std::bind(&WebServer::broadcastLEDPattern, this));
     _server.begin();
     return 0;
 }
 
-void WebServer::setLocalColors() // Called by desktop application
+void WebServer::handleClient()
+{
+    _server.handleClient();
+    syncLEDS();
+}
+
+void WebServer::receiveLEDPattern() // Called by desktop application
 {
     String data_string = _server.arg("plain");
-    StaticJsonDocument<400> jDoc;
+    DynamicJsonDocument jDoc(5000);
     DeserializationError err = deserializeJson(jDoc, data_string);
     if(!err)
     {
@@ -62,14 +68,14 @@ void WebServer::setLocalColors() // Called by desktop application
 
         _rgbPattern = patternBuilder;
 
-        debugPrintRGBPattern();
+        // debugPrintRGBPattern();
         _server.send(204);
         return;
     }
     Serial.println("Error Deserializing Input JSON");
 }
 
-void WebServer::getLocalColors() // Called by other NodeMCU Clients
+void WebServer::broadcastLEDPattern() // Called by other NodeMCU Clients
 {
     DynamicJsonDocument jDoc(5000);
     for(size_t i = 0; i < _rgbPattern.size(); i++)
@@ -88,12 +94,6 @@ void WebServer::getLocalColors() // Called by other NodeMCU Clients
     _server.send(200, "text/plain", out);
 }
 
-void WebServer::handleClient()
-{
-    _server.handleClient();
-    syncLEDS();
-}
-
 void WebServer::initLEDS()
 {
     // Initialize LEDS & set to debug state
@@ -103,13 +103,7 @@ void WebServer::initLEDS()
 }
 
 void WebServer::syncLEDS(){
-    std::vector<CRGB> pattern;
-    for(int i = 0; i < _rgbPattern.size(); i++)
-    {
-        CRGB color = {_rgbPattern[i].r, _rgbPattern[i].g, _rgbPattern[i].b};
-        pattern.push_back(color);
-        _ledController.staticPattern(_leds, pattern);
-    }
+    _ledController.staticPattern(_leds, _rgbPattern);
 }
 
 // DEBUG
